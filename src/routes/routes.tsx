@@ -4,6 +4,7 @@ import { ProtectedRoute } from "./protected-route";
 import Login from "@/pages/auth/LoginPage";
 import Home from "@/pages/home/HomePage";
 import NotFound from "@/pages/NotFoundPage";
+import SignUp from "@/pages/auth/SignUpPage";
 
 const Routes = () => {
 
@@ -29,8 +30,8 @@ const Routes = () => {
       element: <Login />,
     },
     {
-      path: "/",
-      element: <Home />,
+      path: "/signup",
+      element: <SignUp />,
     }
   ];
 

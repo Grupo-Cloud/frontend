@@ -2,8 +2,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/providers/auth-provider";
 
 export function MobileNav() {
+  const { setToken } = useAuth();
   return (
     <div className="space-y-4 py-4">
       <div className="px-3 py-2">
@@ -22,6 +24,9 @@ export function MobileNav() {
           <Button
             variant="ghost"
             className="w-full justify-start gap-2 text-red-600 hover:text-red-600 hover:bg-red-100/10"
+            onClick={() => {
+              setToken(null);
+            }}
           >
             <LogOut className="h-4 w-4" />
             Log out
