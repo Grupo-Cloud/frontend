@@ -17,7 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogDescription } from "@radix-ui/react-dialog";
 import { DialogTitle } from "../ui/dialog";
 import { AlertCircle } from "lucide-react";
-import SignupFormData from "./signup-interface";
+import SignupFormData from "@/interfaces/SignUp";
 
 export function SignUpForm({
   className,
