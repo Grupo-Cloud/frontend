@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { FileTextIcon, HistoryIcon, PlusCircleIcon, PlusIcon } from "lucide-react"
-import { FileUploader } from "@/components/file-uploader"
+import { FileUploader } from "@/components/chat/file-uploader"
 
 interface SidebarButtonsProps {
   onCreateChat?: () => void

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { MenuIcon } from "lucide-react"
-import { UserNav } from "@/components/user-nav"
-import { SidebarButtons } from "@/components/sidebar-buttons"
-import { SourcesList } from "@/components/sources-list"
-import { HistoryList } from "@/components/history-list"
-import { ChatArea } from "@/components/chat-area"
+import { UserNav } from "@/components/chat/user-nav"
+import { SidebarButtons } from "@/components/chat/sidebar-buttons"
+import { SourcesList } from "@/components/chat/sources-list"
+import { HistoryList } from "@/components/chat/history-list"
+import { ChatArea } from "@/components/chat/chat-area"
 
      
 const mockChats = [

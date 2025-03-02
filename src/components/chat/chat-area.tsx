@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { MessageCircleIcon, UploadIcon } from "lucide-react"
-import { FileUploader } from "@/components/file-uploader"
+import { FileUploader } from "@/components/chat/file-uploader"
 
 interface ChatAreaProps {
   documents: any[]
