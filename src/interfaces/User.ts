@@ -1,9 +1,13 @@
 import { UUID } from "crypto"
 
+
 interface User {
+    id: UUID
     email: string
     username: string
-    id: UUID
+}
+
+interface UserDetail extends User {
     documents: Document[]
     chats: Chat[]
 }
@@ -15,7 +19,6 @@ interface Document {
     size: number
     s3_location: string
     created_at: Date
-    
 }
 
 interface Chat {
@@ -23,5 +26,6 @@ interface Chat {
     name: string
 }
 
+export type { User, UserDetail, Document, Chat }
 
-export default User;
+

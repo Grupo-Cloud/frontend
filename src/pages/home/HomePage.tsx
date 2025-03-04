@@ -12,10 +12,7 @@ import { api } from "@/lib/api"
 import { useAuth } from "@/providers/auth-provider"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { queryClient } from "@/lib/query"
-import { UUID } from "crypto"
-import User from "@/interfaces/User"
-
+import {Document, UserDetail} from "@/interfaces/User"
 
 const mockChats = [
   {
@@ -50,7 +47,7 @@ const ACCEPTED_FILE_TYPES = {
 } as const
 
 export default function HomePage() {
-  const [documents, setDocuments] = useState<any[]>([])
+  const [documents, setDocuments] = useState<Document[]>([])
   const [chats, setChats] = useState(mockChats)
   const [selectedChat, setSelectedChat] = useState<string | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -58,7 +55,7 @@ export default function HomePage() {
 
   const { token } = useAuth()
 
-  const fetchUser = async (): Promise<User> => {
+  const fetchUser = async (): Promise<UserDetail> => {
     const user = await api.get("/users/me", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -70,7 +67,7 @@ export default function HomePage() {
   const createDocumentMutation = useMutation({
     mutationFn: (file: File) => {
       const formData = new FormData()
-      formData.append("file", file)
+      formData.append("upload_file", file)
       return api.post(`/users/${user?.id}/documents`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -87,6 +84,12 @@ export default function HomePage() {
   })
 
   useEffect(() => {
+    if (user) {
+      setDocuments(user.documents)
+    }
+  }, [user])
+
+  useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setIsSidebarOpen(false)
@@ -101,6 +104,8 @@ export default function HomePage() {
     return <div>Loading...</div>
   }
 
+  
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes"
     const k = 1024
@@ -110,8 +115,6 @@ export default function HomePage() {
   }
 
   const handleFileSelected = (file: File) => {
-    console.log("Selected file:", file.name)
-
     const maxSize = 10
 
     if (!Object.keys(ACCEPTED_FILE_TYPES).includes(file.type)) {
@@ -125,24 +128,6 @@ export default function HomePage() {
     }
 
     createDocumentMutation.mutate(file)
-
-    
-    const newDocument = {
-      id: crypto.randomUUID(),
-      name: file.name,
-      type: file.type || "Unknown",
-      size: file.size,
-      lastModified: file.lastModified,
-    }
-
-    console.log("Adding new document:", newDocument.name)
-
-    setDocuments((prev) => {
-      const updated = [...prev, newDocument]
-      console.log("Updated documents count:", updated.length)
-      return updated
-    })
-
     toast.success(`Successfully added ${file.name}`)
   }
 
