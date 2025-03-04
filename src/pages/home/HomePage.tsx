@@ -65,19 +65,37 @@ export default function HomePage() {
   }
 
   const createDocumentMutation = useMutation({
-    mutationFn: (file: File) => {
+    mutationFn: async (file: File) => {
       const formData = new FormData()
       formData.append("upload_file", file)
-      return api.post(`/users/${user?.id}/documents`, formData, {
+      return await api.post(`/users/${user?.id}/documents`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       })
+    },
+    onSuccess: () => { 
+      refetchUser()
+      toast.success("Document uploaded successfully")
     }
   });
 
-  const { data: user, isLoading: isLoadingUser } = useQuery({
+  const deleteDocumentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await api.delete(`/users/${user?.id}/documents/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    },
+    onSuccess: () => {
+      refetchUser()
+      toast.success("Document deleted successfully")
+    }
+  })
+
+  const { data: user, isLoading: isLoadingUser, refetch: refetchUser } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
     enabled: !!token,
@@ -104,8 +122,6 @@ export default function HomePage() {
     return <div>Loading...</div>
   }
 
-  
-
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes"
     const k = 1024
@@ -127,12 +143,11 @@ export default function HomePage() {
       return
     }
 
-    createDocumentMutation.mutate(file)
-    toast.success(`Successfully added ${file.name}`)
+    createDocumentMutation.mutateAsync(file)
   }
 
   const handleDeleteDocument = (id: string) => {
-    setDocuments((prev) => prev.filter((doc) => doc.id !== id))
+    deleteDocumentMutation.mutateAsync(id)
   }
 
   const handleDeleteChat = (id: string) => {
