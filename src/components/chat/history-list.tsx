@@ -1,56 +1,61 @@
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { HistoryIcon, MessageCircleIcon, Trash2Icon } from "lucide-react"
+import { Trash2 } from "lucide-react"
 
 interface HistoryListProps {
-  chats: any[]
+  chats: {
+    id: string
+    title: string
+    preview: string
+    date: string
+    messages: number
+  }[]
   selectedChat: string | null
   onSelectChat: (id: string) => void
   onDeleteChat: (id: string) => void
-  formatDate: (dateString: string) => string
+  formatDate: (date: string) => string
 }
 
 export function HistoryList({ chats, selectedChat, onSelectChat, onDeleteChat, formatDate }: HistoryListProps) {
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 overflow-auto p-4">
+      <h2 className="font-semibold mb-4">Chat History</h2>
       {chats.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center mb-4">
-            <HistoryIcon className="w-6 h-6 text-muted-foreground" />
-          </div>
-          <p className="text-sm text-muted-foreground max-w-[260px]">
-            Your chat history will appear here. Start a new chat to begin.
-          </p>
+        <div className="text-center text-muted-foreground text-sm p-4">
+          No chat history yet. Start a new chat to begin.
         </div>
       ) : (
-        chats.map((chat) => (
-          <div
-            key={chat.id}
-            className={cn(
-              "flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors",
-              selectedChat === chat.id && "bg-muted",
-            )}
-          >
-            <button onClick={() => onSelectChat(chat.id)} className="flex items-start gap-3 flex-1 min-w-0 text-left">
-              <MessageCircleIcon className="h-5 w-5 mt-0.5 text-muted-foreground" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium truncate">{chat.title}</p>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(chat.date)}</span>
-                </div>
-                <p className="text-sm text-muted-foreground truncate">{chat.preview}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="text-xs bg-muted-foreground/10 text-muted-foreground px-2 py-0.5 rounded-full">
-                    {chat.messages} messages
-                  </span>
-                </div>
+        <div className="space-y-2">
+          {chats.map((chat) => (
+            <div
+              key={chat.id}
+              className={cn(
+                "relative group flex flex-col rounded-md border p-3 cursor-pointer hover:bg-accent",
+                selectedChat === chat.id && "bg-accent",
+              )}
+              onClick={() => onSelectChat(chat.id)}
+            >
+              <div className="font-medium truncate">{chat.title}</div>
+              <div className="text-xs text-muted-foreground truncate">{chat.preview}</div>
+              <div className="flex items-center justify-between mt-2">
+                <div className="text-xs text-muted-foreground">{formatDate(chat.date)}</div>
+                <div className="text-xs text-muted-foreground">{chat.messages} messages</div>
               </div>
-            </button>
-            <Button variant="ghost" size="icon" onClick={() => onDeleteChat(chat.id)} className="ml-2">
-              <Trash2Icon className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </div>
-        ))
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDeleteChat(chat.id)
+                }}
+                className="absolute right-2 top-2 h-6 w-6 opacity-0 group-hover:opacity-100"
+              >
+                <Trash2 className="h-3 w-3" />
+                <span className="sr-only">Delete</span>
+              </Button>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   )

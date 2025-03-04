@@ -1,26 +1,40 @@
+"use client"
+
+import type React from "react"
+
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { MessageCircleIcon, UploadIcon } from "lucide-react"
-import { FileUploader } from "@/components/chat/file-uploader"
+import { useRef } from "react"
 
 interface ChatAreaProps {
   documents: any[]
   selectedChat: string | null
-  isUploadOpen: boolean
-  setIsUploadOpen: (open: boolean) => void
-  onUploadComplete: (files: File[]) => void
+  onFileSelected: (file: File) => void
   onCreateChat: () => void
 }
 
-export function ChatArea({
-  documents,
-  selectedChat,
-  isUploadOpen,
-  setIsUploadOpen,
-  onUploadComplete,
-  onCreateChat,
-}: ChatAreaProps) {
+export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat }: ChatAreaProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files)
+      console.log("Files selected in ChatArea:", filesArray.length)
+
+      // Process each file individually
+      filesArray.forEach((file) => {
+        console.log("Processing file:", file.name)
+        onFileSelected(file)
+      })
+
+      // Reset the input value to ensure onChange fires even if selecting the same file again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    }
+  }
+
   return (
     <div className="flex-1 flex flex-col">
       {documents.length === 0 ? (
@@ -32,19 +46,20 @@ export function ChatArea({
           <p className="text-sm text-muted-foreground mb-4 max-w-[300px]">
             Upload your documents or paste a link to start chatting with your data
           </p>
-          <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">Upload a source</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add Source</DialogTitle>
-              </DialogHeader>
-              <div className="mt-4">
-                <FileUploader onUploadComplete={onUploadComplete} />
-              </div>
-            </DialogContent>
-          </Dialog>
+
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleFileChange}
+            accept=".pdf,.docx,.doc,.txt,.md,.csv"
+            multiple={true}
+          />
+
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+            Upload a source
+          </Button>
         </div>
       ) : selectedChat ? (
         <div className="flex-1 overflow-hidden">{/* Chat messages will go here */}</div>

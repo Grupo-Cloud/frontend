@@ -1,27 +1,46 @@
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { FileTextIcon, HistoryIcon, PlusCircleIcon, PlusIcon } from "lucide-react"
-import { FileUploader } from "@/components/chat/file-uploader"
+"use client"
 
-interface SidebarButtonsProps {
+import type React from "react"
+
+import { Button } from "@/components/ui/button"
+import { FileTextIcon, HistoryIcon, PlusCircleIcon, PlusIcon } from "lucide-react"
+import { useRef } from "react"
+
+interface SidebarButtonProps {
   onCreateChat?: () => void
   activeTab: "sources" | "history"
   setActiveTab: (tab: "sources" | "history") => void
-  isUploadOpen: boolean
-  setIsUploadOpen: (open: boolean) => void
   documentsLength: number
-  onUploadComplete: (files: File[]) => void
+  onFileSelected: (file: File) => void
 }
 
-export function SidebarButtons({
+export function SidebarButton({
   onCreateChat,
   activeTab,
   setActiveTab,
-  isUploadOpen,
-  setIsUploadOpen,
   documentsLength,
-  onUploadComplete,
-}: SidebarButtonsProps) {
+  onFileSelected,
+}: SidebarButtonProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files)
+      console.log("Files selected in SidebarButton:", filesArray.length)
+
+      // Process each file individually
+      filesArray.forEach((file) => {
+        console.log("Processing file:", file.name)
+        onFileSelected(file)
+      })
+
+      // Reset the input value to ensure onChange fires even if selecting the same file again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    }
+  }
+
   return (
     <div className="grid grid-cols-1 gap-2 p-4">
       <Button className="w-full" variant="default" onClick={onCreateChat} disabled={documentsLength === 0}>
@@ -46,22 +65,21 @@ export function SidebarButtons({
           History
         </Button>
       </div>
-      <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-        <DialogTrigger asChild>
-          <Button className="w-full" variant="outline">
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Add source
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add Source</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <FileUploader onUploadComplete={onUploadComplete} />
-          </div>
-        </DialogContent>
-      </Dialog>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFileChange}
+        accept=".pdf,.docx,.doc,.txt,.md,.csv"
+        multiple={true}
+      />
+
+      <Button className="w-full" variant="outline" onClick={() => fileInputRef.current?.click()}>
+        <PlusIcon className="h-4 w-4 mr-2" />
+        Add source
+      </Button>
     </div>
   )
 }

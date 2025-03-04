@@ -1,16 +1,19 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { MenuIcon } from "lucide-react"
 import { UserNav } from "@/components/chat/user-nav"
-import { SidebarButtons } from "@/components/chat/sidebar-buttons"
-import { SourcesList } from "@/components/chat/sources-list"
+import { SidebarButton } from "@/components/chat/sidebar-buttons"
+import { SourceList } from "@/components/chat/sources-list"
 import { HistoryList } from "@/components/chat/history-list"
 import { ChatArea } from "@/components/chat/chat-area"
 import { api } from "@/lib/api"
 import { useAuth } from "@/providers/auth-provider"
 import { useQuery } from "@tanstack/react-query"
+import { toast } from "sonner"
 
-
+// Mock data for chat history
 const mockChats = [
   {
     id: "1",
@@ -35,34 +38,37 @@ const mockChats = [
   },
 ]
 
+const ACCEPTED_FILE_TYPES = {
+  "application/pdf": "PDF",
+  "text/plain": "Text",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "DOCX",
+  "application/msword": "DOC",
+  "text/markdown": "Markdown",
+} as const
 
 export default function HomePage() {
-
   const [documents, setDocuments] = useState<any[]>([])
   const [chats, setChats] = useState(mockChats)
-  const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [selectedChat, setSelectedChat] = useState<string | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"sources" | "history">("sources")
 
-  const { token } = useAuth();
+  const { token } = useAuth()
 
   const fetchUser = async () => {
-    const user = await api.get("/users/me",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return user.data;
-  };
+    const user = await api.get("/users/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return user.data
+  }
 
   const { data: user, isLoading: isLoadingUser } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
     enabled: !!token,
-  });
+  })
 
   useEffect(() => {
     const handleResize = () => {
@@ -79,8 +85,6 @@ export default function HomePage() {
     return <div>Loading...</div>
   }
 
-  
-
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes"
     const k = 1024
@@ -89,18 +93,42 @@ export default function HomePage() {
     return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   }
 
-  const handleUploadComplete = (files: File[]) => {
-    setIsUploadOpen(false)
-    setDocuments((prev) => [
-      ...prev,
-      ...files.map((file) => ({
-        id: crypto.randomUUID(),
-        name: file.name,
-        type: file.type || "Unknown",
-        size: file.size,
-        lastModified: file.lastModified,
-      })),
-    ])
+  const handleFileSelected = (file: File) => {
+    console.log("Selected file:", file.name)
+
+    // Validate file
+    const maxSize = 10 // 10MB
+
+    // Validate file type
+    if (!Object.keys(ACCEPTED_FILE_TYPES).includes(file.type)) {
+      toast.error(`${file.name} is not a supported file type`)
+      return
+    }
+
+    // Validate file size
+    if (file.size > maxSize * 1024 * 1024) {
+      toast.error(`${file.name} exceeds ${maxSize}MB limit`)
+      return
+    }
+
+    // Process valid file and add it to documents
+    const newDocument = {
+      id: crypto.randomUUID(),
+      name: file.name,
+      type: file.type || "Unknown",
+      size: file.size,
+      lastModified: file.lastModified,
+    }
+
+    console.log("Adding new document:", newDocument.name)
+
+    setDocuments((prev) => {
+      const updated = [...prev, newDocument]
+      console.log("Updated documents count:", updated.length)
+      return updated
+    })
+
+    toast.success(`Successfully added ${file.name}`)
   }
 
   const handleDeleteDocument = (id: string) => {
@@ -138,17 +166,15 @@ export default function HomePage() {
   const DesktopLayout = () => (
     <div className="hidden md:flex h-screen">
       <div className="w-[300px] border-r flex flex-col">
-        <SidebarButtons
+        <SidebarButton
           onCreateChat={handleCreateChat}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          isUploadOpen={isUploadOpen}
-          setIsUploadOpen={setIsUploadOpen}
           documentsLength={documents.length}
-          onUploadComplete={handleUploadComplete}
+          onFileSelected={handleFileSelected}
         />
         {activeTab === "sources" ? (
-          <SourcesList documents={documents} onDeleteDocument={handleDeleteDocument} formatFileSize={formatFileSize} />
+          <SourceList documents={documents} onDeleteDocument={handleDeleteDocument} formatFileSize={formatFileSize} />
         ) : (
           <HistoryList
             chats={chats}
@@ -167,9 +193,7 @@ export default function HomePage() {
         <ChatArea
           documents={documents}
           selectedChat={selectedChat}
-          isUploadOpen={isUploadOpen}
-          setIsUploadOpen={setIsUploadOpen}
-          onUploadComplete={handleUploadComplete}
+          onFileSelected={handleFileSelected}
           onCreateChat={handleCreateChat}
         />
       </div>
@@ -181,20 +205,18 @@ export default function HomePage() {
       <div className="border-b flex items-center justify-between px-4 py-2">
         <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
           <SheetContent side="left" className="w-full max-w-[300px] p-0">
-            <SidebarButtons
+            <SidebarButton
               onCreateChat={() => {
                 handleCreateChat()
                 setIsSidebarOpen(false)
               }}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
-              isUploadOpen={isUploadOpen}
-              setIsUploadOpen={setIsUploadOpen}
               documentsLength={documents.length}
-              onUploadComplete={handleUploadComplete}
+              onFileSelected={handleFileSelected}
             />
             {activeTab === "sources" ? (
-              <SourcesList
+              <SourceList
                 documents={documents}
                 onDeleteDocument={handleDeleteDocument}
                 formatFileSize={formatFileSize}
@@ -219,9 +241,7 @@ export default function HomePage() {
       <ChatArea
         documents={documents}
         selectedChat={selectedChat}
-        isUploadOpen={isUploadOpen}
-        setIsUploadOpen={setIsUploadOpen}
-        onUploadComplete={handleUploadComplete}
+        onFileSelected={handleFileSelected}
         onCreateChat={handleCreateChat}
       />
     </div>
