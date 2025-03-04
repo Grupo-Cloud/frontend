@@ -10,10 +10,13 @@ import { HistoryList } from "@/components/chat/history-list"
 import { ChatArea } from "@/components/chat/chat-area"
 import { api } from "@/lib/api"
 import { useAuth } from "@/providers/auth-provider"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { queryClient } from "@/lib/query"
+import { UUID } from "crypto"
+import User from "@/interfaces/User"
 
-// Mock data for chat history
+
 const mockChats = [
   {
     id: "1",
@@ -55,7 +58,7 @@ export default function HomePage() {
 
   const { token } = useAuth()
 
-  const fetchUser = async () => {
+  const fetchUser = async (): Promise<User> => {
     const user = await api.get("/users/me", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -63,6 +66,19 @@ export default function HomePage() {
     })
     return user.data
   }
+
+  const createDocumentMutation = useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData()
+      formData.append("file", file)
+      return api.post(`/users/${user?.id}/documents`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+    }
+  });
 
   const { data: user, isLoading: isLoadingUser } = useQuery({
     queryKey: ["user"],
@@ -96,22 +112,21 @@ export default function HomePage() {
   const handleFileSelected = (file: File) => {
     console.log("Selected file:", file.name)
 
-    // Validate file
-    const maxSize = 10 // 10MB
+    const maxSize = 10
 
-    // Validate file type
     if (!Object.keys(ACCEPTED_FILE_TYPES).includes(file.type)) {
       toast.error(`${file.name} is not a supported file type`)
       return
     }
 
-    // Validate file size
     if (file.size > maxSize * 1024 * 1024) {
       toast.error(`${file.name} exceeds ${maxSize}MB limit`)
       return
     }
 
-    // Process valid file and add it to documents
+    createDocumentMutation.mutate(file)
+
+    
     const newDocument = {
       id: crypto.randomUUID(),
       name: file.name,

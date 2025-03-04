@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
   ReactNode,
+  useCallback,
 } from "react";
 import { api } from "@/lib/api";
 
@@ -49,30 +50,28 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [refreshToken]);
 
-  const refreshAccessToken = async () => {
+  const logout = useCallback(() => {
+    setToken(null);
+    setRefreshToken(null);
+  }, []);
+
+  const refreshAccessToken = useCallback(async () => {
     try {
       if (!refreshToken) throw new Error("No refresh token available");
-
       const response = await api.post("/auth/refresh", {
         refreshToken,
       });
-
       const newToken = response.data.accessToken;
       setToken(newToken);
-
       return newToken;
     } catch (error) {
       console.error("Failed to refresh token", error);
       logout();
       return null;
     }
-  };
+  }, [refreshToken, logout]);
 
-  const logout = () => {
-    setToken(null);
-    setRefreshToken(null);
-  };
-
+  
   useEffect(() => {
     const interceptor = api.interceptors.response.use(
       (response) => response,
@@ -93,8 +92,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => {
       api.interceptors.response.eject(interceptor);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    
+  }, [refreshAccessToken]);
 
   const contextValue = useMemo(
     () => ({
@@ -104,7 +103,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setRefreshToken,
       logout,
     }),
-    [token, refreshToken]
+    [token, refreshToken, logout]
   );
 
   return (

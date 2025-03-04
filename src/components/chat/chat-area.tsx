@@ -1,7 +1,4 @@
-"use client"
-
 import type React from "react"
-
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MessageCircleIcon, UploadIcon } from "lucide-react"
