@@ -27,7 +27,7 @@ export function LoginForm({
     "email": "",
     "password": "",
   });
-  const { setToken } = useAuth();
+  const { setToken, setRefreshToken } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
 
@@ -35,6 +35,7 @@ export function LoginForm({
     mutationFn: async (data: FormData) => await api.post("/auth/login", data),
     onSuccess: (data) => {
       setToken(data.data.access_token);
+      setRefreshToken(data.data.refresh_token);
       navigate("/");
       mutation.reset();
     },

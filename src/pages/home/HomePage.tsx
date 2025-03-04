@@ -6,8 +6,12 @@ import { SidebarButtons } from "@/components/chat/sidebar-buttons"
 import { SourcesList } from "@/components/chat/sources-list"
 import { HistoryList } from "@/components/chat/history-list"
 import { ChatArea } from "@/components/chat/chat-area"
+import User from "@/interfaces/User"
+import { api } from "@/lib/api"
+import { useAuth } from "@/providers/auth-provider"
+import { useQuery } from "@tanstack/react-query"
 
-     
+
 const mockChats = [
   {
     id: "1",
@@ -32,13 +36,34 @@ const mockChats = [
   },
 ]
 
+
 export default function HomePage() {
+
   const [documents, setDocuments] = useState<any[]>([])
   const [chats, setChats] = useState(mockChats)
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [selectedChat, setSelectedChat] = useState<string | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"sources" | "history">("sources")
+
+  const { token } = useAuth();
+
+  const fetchUser = async () => {
+    const user = await api.get("/users/me",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return user.data;
+  };
+
+  const { data: user, isLoading: isLoadingUser } = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUser,
+    enabled: !!token,
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -50,6 +75,12 @@ export default function HomePage() {
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
+
+  if (isLoadingUser) {
+    return <div>Loading...</div>
+  }
+
+  
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes"
@@ -132,7 +163,7 @@ export default function HomePage() {
       <div className="flex-1 flex flex-col">
         <div className="border-b flex items-center justify-between px-4 py-2">
           <div className="flex-1 text-center font-semibold">Chat</div>
-          <UserNav />
+          <UserNav user={user} />
         </div>
         <ChatArea
           documents={documents}
@@ -184,7 +215,7 @@ export default function HomePage() {
           <MenuIcon className="h-5 w-5" />
         </button>
         <div className="flex-1 text-center font-semibold">Chat</div>
-        <UserNav />
+        <UserNav user={user} />
       </div>
       <ChatArea
         documents={documents}
