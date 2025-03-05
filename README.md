@@ -1,5 +1,23 @@
 # React + TypeScript + Vite
 
+## Como correr la APP?
+
+Primera instala las dependencias:
+
+`npm i` 
+
+Adicionalmente, a la instalacion de dependencias se debe crear un archivo `.env` con la siguiente informacion:
+
+```
+VITE_BACK_URL = http://localhost:8000
+```
+
+Una vez instaladas las dependencias y configurado el archivo de ambiente, ya puede ejecutar la aplicacion con el siguiente comando:
+
+`npm run dev`
+
+---
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
