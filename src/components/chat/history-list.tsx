@@ -1,22 +1,31 @@
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Trash2 } from "lucide-react"
+import {Chat} from "@/interfaces/User"
 
 interface HistoryListProps {
-  chats: {
-    id: string
-    title: string
-    preview: string
-    date: string
-    messages: number
-  }[]
-  selectedChat: string | null
+  chats: Chat[]
+  selectedChat: Chat  | undefined
   onSelectChat: (id: string) => void
   onDeleteChat: (id: string) => void
-  formatDate: (date: string) => string
 }
 
-export function HistoryList({ chats, selectedChat, onSelectChat, onDeleteChat, formatDate }: HistoryListProps) {
+export function HistoryList({ chats, selectedChat, onSelectChat, onDeleteChat }: Readonly<HistoryListProps>) {
+
+  const formatDate = (date: string): string => {
+    const validDate = new Date(date); 
+  
+    if (isNaN(validDate.getTime())) {
+      throw new Error("Invalid date format");
+    }
+  
+    return validDate.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   return (
     <div className="flex-1 overflow-auto p-4">
       <h2 className="font-semibold mb-4">Chat History</h2>
@@ -31,15 +40,13 @@ export function HistoryList({ chats, selectedChat, onSelectChat, onDeleteChat, f
               key={chat.id}
               className={cn(
                 "relative group flex flex-col rounded-md border p-3 cursor-pointer hover:bg-accent",
-                selectedChat === chat.id && "bg-accent",
+                selectedChat?.id === chat.id && "bg-accent",
               )}
               onClick={() => onSelectChat(chat.id)}
             >
-              <div className="font-medium truncate">{chat.title}</div>
-              <div className="text-xs text-muted-foreground truncate">{chat.preview}</div>
+              <div className="font-medium truncate">{chat.name}</div>
               <div className="flex items-center justify-between mt-2">
-                <div className="text-xs text-muted-foreground">{formatDate(chat.date)}</div>
-                <div className="text-xs text-muted-foreground">{chat.messages} messages</div>
+                <div className="text-xs text-muted-foreground">{formatDate(chat.creation_date)}</div>
               </div>
               <Button
                 variant="ghost"

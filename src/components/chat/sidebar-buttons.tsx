@@ -17,7 +17,7 @@ export function SidebarButton({
   setActiveTab,
   documentsLength,
   onFileSelected,
-}: SidebarButtonProps) {
+}: Readonly<SidebarButtonProps>) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

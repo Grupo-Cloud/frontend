@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogOut } from "lucide-react"
 import { useAuth } from "@/providers/auth-provider";
-import User from "@/interfaces/User";
+import {UserDetail} from "@/interfaces/User";
 
 interface UserNavProps {
-  user: User;
+  user: UserDetail | undefined;
 }
 
-export function UserNav({ user }: UserNavProps) {
+export function UserNav({ user }: Readonly<UserNavProps>) {
   const { logout } = useAuth();
   
   return (

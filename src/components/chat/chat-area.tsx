@@ -2,16 +2,22 @@ import type React from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MessageCircleIcon, UploadIcon } from "lucide-react"
-import { useRef } from "react"
+import { useRef, useState } from "react"
+import {Chat, Document, Message} from "@/interfaces/User"
+import { useMutation } from "@tanstack/react-query"
+import { api } from "@/lib/api"
+import { useAuth } from "@/providers/auth-provider"
 
 interface ChatAreaProps {
-  documents: any[]
-  selectedChat: string | null
+  documents: Document[]
+  selectedChat: Chat | undefined
   onFileSelected: (file: File) => void
   onCreateChat: () => void
 }
 
-export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat }: ChatAreaProps) {
+export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat }: Readonly<ChatAreaProps>) {
+  const [message, setMessage] = useState<Message["content"]>("")
+  const { token } = useAuth()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,18 +25,48 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
       const filesArray = Array.from(e.target.files)
       console.log("Files selected in ChatArea:", filesArray.length)
 
-      // Process each file individually
       filesArray.forEach((file) => {
         console.log("Processing file:", file.name)
         onFileSelected(file)
       })
 
-      // Reset the input value to ensure onChange fires even if selecting the same file again
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
     }
   }
+
+  const createChatMessageMutation = useMutation({
+    mutationFn: async (message: Message) => {
+      return await api.post(`/chats/${selectedChat?.id}/messages`, message, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    },
+  })
+
+  const createLLMResponseMutation = useMutation({
+    mutationFn: async (message: Message) => {
+      const query = message.content;  
+      const response = await api.post(`/llm/generate?query=${encodeURIComponent(query)}`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log("LLM Response:", data);
+    },
+  });
+
+  const handleSendMessage = () => {
+    if (message.trim() === "") {
+      return
+    }
+    createChatMessageMutation.mutate({ content: message })
+    createLLMResponseMutation.mutate({ content: message })
+
+    setMessage("")
+  }
+
 
   return (
     <div className="flex-1 flex flex-col">
@@ -41,7 +77,7 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
           </div>
           <h3 className="text-xl font-semibold mb-2">Add a source to get started</h3>
           <p className="text-sm text-muted-foreground mb-4 max-w-[300px]">
-            Upload your documents or paste a link to start chatting with your data
+            Upload your documents to start chatting with your data
           </p>
 
           {/* Hidden file input */}
@@ -84,8 +120,10 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
             placeholder={documents.length === 0 ? "Upload a source to start chatting..." : "Type your message..."}
             className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
             disabled={documents.length === 0 || !selectedChat}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
           />
-          <Button size="icon" variant="ghost" disabled={documents.length === 0 || !selectedChat}>
+          <Button size="icon" variant="ghost" disabled={documents.length === 0 || !selectedChat} onClick={handleSendMessage}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
             </svg>

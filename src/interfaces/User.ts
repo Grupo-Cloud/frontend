@@ -24,8 +24,20 @@ interface Document {
 interface Chat {
     id: UUID
     name: string
+    creation_date: string
 }
 
-export type { User, UserDetail, Document, Chat }
+interface ChatCreate {
+    name: string
+    user_id: UUID
+}
+
+interface Message {
+    content: string
+}
+
+
+
+export type { User, UserDetail, Document, Chat, ChatCreate, Message }
 
 

@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { MenuIcon } from "lucide-react"
@@ -12,31 +10,9 @@ import { api } from "@/lib/api"
 import { useAuth } from "@/providers/auth-provider"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
-import {Document, UserDetail} from "@/interfaces/User"
+import { Document, UserDetail, Chat, ChatCreate } from "@/interfaces/User"
 
-const mockChats = [
-  {
-    id: "1",
-    title: "Research on AI Ethics",
-    preview: "Discussion about the implications of AI in healthcare",
-    date: "2024-02-26T10:30:00",
-    messages: 12,
-  },
-  {
-    id: "2",
-    title: "Data Analysis Project",
-    preview: "Analyzing quarterly sales data and trends",
-    date: "2024-02-25T15:45:00",
-    messages: 8,
-  },
-  {
-    id: "3",
-    title: "Technical Documentation",
-    preview: "API documentation review and updates",
-    date: "2024-02-24T09:15:00",
-    messages: 15,
-  },
-]
+
 
 const ACCEPTED_FILE_TYPES = {
   "application/pdf": "PDF",
@@ -48,7 +24,7 @@ const ACCEPTED_FILE_TYPES = {
 
 export default function HomePage() {
   const [documents, setDocuments] = useState<Document[]>([])
-  const [chats, setChats] = useState(mockChats)
+  const [chats, setChats] = useState<Chat[]>([])
   const [selectedChat, setSelectedChat] = useState<string | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"sources" | "history">("sources")
@@ -75,11 +51,29 @@ export default function HomePage() {
         },
       })
     },
-    onSuccess: () => { 
+    onSuccess: () => {
       refetchUser()
       toast.success("Document uploaded successfully")
     }
   });
+
+
+  const createChatMutation = useMutation({
+    mutationFn: async (chat: ChatCreate): Promise<Chat> => {
+      const response = await api.post(`/users/${user?.id}/chats`, chat, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      return response.data
+    },
+    onSuccess: (response) => {
+      refetchUser()
+      setSelectedChat(response.id)
+      toast.success("Chat created successfully")
+    }
+  })
+
 
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -95,6 +89,20 @@ export default function HomePage() {
     }
   })
 
+  const deleteChatMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await api.delete(`/users/${user?.id}/chats/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    },
+    onSuccess: () => {
+      refetchUser()
+      toast.success("Chat deleted successfully")
+    }
+  })
+
   const { data: user, isLoading: isLoadingUser, refetch: refetchUser } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
@@ -104,6 +112,7 @@ export default function HomePage() {
   useEffect(() => {
     if (user) {
       setDocuments(user.documents)
+      setChats(user.chats)
     }
   }, [user])
 
@@ -117,6 +126,8 @@ export default function HomePage() {
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
+
+  
 
   if (isLoadingUser) {
     return <div>Loading...</div>
@@ -142,7 +153,6 @@ export default function HomePage() {
       toast.error(`${file.name} exceeds ${maxSize}MB limit`)
       return
     }
-
     createDocumentMutation.mutateAsync(file)
   }
 
@@ -151,32 +161,17 @@ export default function HomePage() {
   }
 
   const handleDeleteChat = (id: string) => {
-    setChats((prev) => prev.filter((chat) => chat.id !== id))
-    if (selectedChat === id) {
-      setSelectedChat(null)
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-    if (days === 0) {
-      return "Today"
-    } else if (days === 1) {
-      return "Yesterday"
-    } else if (days < 7) {
-      return `${days} days ago`
-    } else {
-      return date.toLocaleDateString()
-    }
+    deleteChatMutation.mutateAsync(id)
   }
 
   const handleCreateChat = () => {
-    console.log("Creating new chat")
+    if (user?.id) {
+      createChatMutation.mutateAsync({ name: "New Chat", user_id: user.id })
+    } else {
+      toast.error("User ID is undefined")
+    }
   }
+
 
   const DesktopLayout = () => (
     <div className="hidden md:flex h-screen">
@@ -193,10 +188,9 @@ export default function HomePage() {
         ) : (
           <HistoryList
             chats={chats}
-            selectedChat={selectedChat}
+            selectedChat={chats.find((chat) => chat.id === selectedChat)}
             onSelectChat={setSelectedChat}
             onDeleteChat={handleDeleteChat}
-            formatDate={formatDate}
           />
         )}
       </div>
@@ -207,7 +201,7 @@ export default function HomePage() {
         </div>
         <ChatArea
           documents={documents}
-          selectedChat={selectedChat}
+          selectedChat={chats.find((chat) => chat.id === selectedChat)}
           onFileSelected={handleFileSelected}
           onCreateChat={handleCreateChat}
         />
@@ -239,10 +233,9 @@ export default function HomePage() {
             ) : (
               <HistoryList
                 chats={chats}
-                selectedChat={selectedChat}
+                selectedChat={chats.find((chat) => chat.id === selectedChat)}
                 onSelectChat={setSelectedChat}
                 onDeleteChat={handleDeleteChat}
-                formatDate={formatDate}
               />
             )}
           </SheetContent>
@@ -255,7 +248,7 @@ export default function HomePage() {
       </div>
       <ChatArea
         documents={documents}
-        selectedChat={selectedChat}
+        selectedChat={chats.find((chat) => chat.id === selectedChat)}
         onFileSelected={handleFileSelected}
         onCreateChat={handleCreateChat}
       />
