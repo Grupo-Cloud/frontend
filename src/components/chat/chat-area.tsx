@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MessageCircleIcon, UploadIcon } from "lucide-react"
 import { useRef, useState } from "react"
-import {Chat, Document, Message} from "@/interfaces/User"
-import { useMutation } from "@tanstack/react-query"
+import { Chat, Document, Message } from "@/interfaces/User"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { useAuth } from "@/providers/auth-provider"
 
@@ -23,10 +23,7 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files)
-      console.log("Files selected in ChatArea:", filesArray.length)
-
       filesArray.forEach((file) => {
-        console.log("Processing file:", file.name)
         onFileSelected(file)
       })
 
@@ -36,6 +33,23 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
     }
   }
 
+  const fetchChatMessages = async () => {
+    const response = await api.get(`/chats/${selectedChat?.id}/messages`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return response.data
+  }
+
+  const { data: chatMessages, refetch: refetchMessages } = useQuery({
+    queryKey: ["chatMessages", selectedChat?.id],
+    queryFn: fetchChatMessages,
+    enabled: !!selectedChat,
+  })
+
+
+
   const createChatMessageMutation = useMutation({
     mutationFn: async (message: Message) => {
       return await api.post(`/chats/${selectedChat?.id}/messages`, message, {
@@ -44,18 +58,22 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
         },
       })
     },
+    onSuccess: () => {
+      refetchMessages()
+    },
   })
 
   const createLLMResponseMutation = useMutation({
     mutationFn: async (message: Message) => {
-      const query = message.content;  
+      const query = message.content;
       const response = await api.post(`/llm/generate?query=${encodeURIComponent(query)}`);
       return response.data;
     },
     onSuccess: (data) => {
-      console.log("LLM Response:", data);
+      createChatMessageMutation.mutate({ content: data.response })
     },
   });
+
 
   const handleSendMessage = () => {
     if (message.trim() === "") {
@@ -63,10 +81,8 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
     }
     createChatMessageMutation.mutate({ content: message })
     createLLMResponseMutation.mutate({ content: message })
-
     setMessage("")
   }
-
 
   return (
     <div className="flex-1 flex flex-col">
@@ -95,7 +111,30 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
           </Button>
         </div>
       ) : selectedChat ? (
-        <div className="flex-1 overflow-hidden">{/* Chat messages will go here */}</div>
+        <div className="flex-1 overflow-hidden">
+          <div className="flex-1 flex flex-col-reverse overflow-y-auto p-4">
+            {chatMessages && chatMessages.length > 0 ? (
+              chatMessages.slice().reverse().map((message) => (
+                <div key={message.id} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                      <MessageCircleIcon className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">
+                        {message.content}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-muted-foreground text-center p-4">
+                ¡Empieza escribiendo tu primer mensaje!
+              </div>
+            )}
+          </div>
+        </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
