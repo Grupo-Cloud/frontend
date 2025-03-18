@@ -23,12 +23,8 @@ export function SidebarTabs({
   handleDeleteChat,
   formatFileSize,
 }: Readonly<SidebarTabsProps>) {
-  
   return (
-    <Tabs
-      defaultValue="sources"
-      className="pr-4 pl-4"
-    >
+    <Tabs defaultValue="sources" className="pr-4 pl-4">
       <TabsList className="grid grid-cols-2 gap-2">
         <TabsTrigger value="sources">
           <FileTextIcon className="h-4 w-4 mr-2" />
@@ -40,19 +36,23 @@ export function SidebarTabs({
         </TabsTrigger>
       </TabsList>
       <TabsContent value="sources">
-        <SourceList
-          documents={documents}
-          onDeleteDocument={handleDeleteDocument}
-          formatFileSize={formatFileSize}
-        />
+        <div className="h-full max-h-[calc(100vh-200px)] overflow-y-auto sm:pr-2 md:pr-2 scrollbar-hide-mobile dark:scrollbar-dark">
+          <SourceList
+            documents={documents}
+            onDeleteDocument={handleDeleteDocument}
+            formatFileSize={formatFileSize}
+          />
+        </div>
       </TabsContent>
       <TabsContent value="history">
-        <HistoryList
-          chats={chats}
-          selectedChat={chats.find((chat) => chat.id === selectedChat)}
-          onSelectChat={setSelectedChat}
-          onDeleteChat={handleDeleteChat}
-        />
+        <div className="h-full max-h-[calc(100vh-200px)] overflow-y-auto sm:pr-2 md:pr-2 scrollbar-hide-mobile dark:scrollbar-dark">
+          <HistoryList
+            chats={chats}
+            selectedChat={chats.find((chat) => chat.id === selectedChat)}
+            onSelectChat={setSelectedChat}
+            onDeleteChat={handleDeleteChat}
+          />
+        </div>
       </TabsContent>
     </Tabs>
   );
