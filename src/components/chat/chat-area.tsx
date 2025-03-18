@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MessageCircleIcon, UploadIcon } from "lucide-react"
 import { useRef, useState } from "react"
-import { Chat, Document, Message } from "@/interfaces/User"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { Chat, Document, GetMessage, LLMRequest, Message } from "@/interfaces/User"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { useAuth } from "@/providers/auth-provider"
 
@@ -19,6 +19,7 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
   const [message, setMessage] = useState<Message["content"]>("")
   const { token } = useAuth()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const queryClient = useQueryClient()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -42,15 +43,17 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
     return response.data
   }
 
-  const { data: chatMessages, refetch: refetchMessages } = useQuery({
+  const { data: chatMessages } = useQuery<GetMessage[] | undefined>({
     queryKey: ["chatMessages", selectedChat?.id],
     queryFn: fetchChatMessages,
     enabled: !!selectedChat,
   })
 
+  
 
-
+  
   const createChatMessageMutation = useMutation({
+    mutationKey: ["addChatMessage", selectedChat?.id],
     mutationFn: async (message: Message) => {
       return await api.post(`/chats/${selectedChat?.id}/messages`, message, {
         headers: {
@@ -59,30 +62,32 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
       })
     },
     onSuccess: () => {
-      refetchMessages()
+      queryClient.invalidateQueries({ queryKey: ["chatMessages", selectedChat?.id] }
+      )
     },
   })
 
   const createLLMResponseMutation = useMutation({
-    mutationFn: async (message: Message) => {
+    mutationFn: async (message: LLMRequest) => {
       const query = message.content;
       const response = await api.post(`/llm/generate?query=${encodeURIComponent(query)}`);
       return response.data;
     },
-    onSuccess: (data) => {
-      createChatMessageMutation.mutate({ content: data.response })
+    onSuccess: async (data) => {
+      await createChatMessageMutation.mutateAsync({ content: data.response.content, from_user: false });
     },
   });
 
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (message.trim() === "") {
       return
     }
-    createChatMessageMutation.mutate({ content: message })
-    createLLMResponseMutation.mutate({ content: message })
+    await createChatMessageMutation.mutateAsync({ content: message, from_user: true })
+    await createLLMResponseMutation.mutateAsync({ content: message })
     setMessage("")
   }
+
 
   return (
     <div className="flex-1 flex flex-col">
@@ -95,15 +100,14 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
           <p className="text-sm text-muted-foreground mb-4 max-w-[300px]">
             Upload your documents to start chatting with your data
           </p>
-
-          {/* Hidden file input */}
+ 
           <input
             ref={fileInputRef}
             type="file"
             className="hidden"
             onChange={handleFileChange}
             accept=".pdf,.docx,.doc,.txt,.md,.csv"
-            multiple={true}
+            multiple={false}
           />
 
           <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
@@ -114,7 +118,7 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
         <div className="flex-1 overflow-hidden">
           <div className="flex-1 flex flex-col-reverse overflow-y-auto p-4">
             {chatMessages && chatMessages.length > 0 ? (
-              chatMessages.slice().reverse().map((message) => (
+              chatMessages.slice().reverse().map((message: GetMessage) => (
                 <div key={message.id} className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
@@ -130,7 +134,7 @@ export function ChatArea({ documents, selectedChat, onFileSelected, onCreateChat
               ))
             ) : (
               <div className="text-sm text-muted-foreground text-center p-4">
-                ¡Empieza escribiendo tu primer mensaje!
+                ¡Start the conversation!
               </div>
             )}
           </div>

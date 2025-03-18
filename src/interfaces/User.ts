@@ -1,6 +1,5 @@
 import { UUID } from "crypto"
 
-
 interface User {
     id: UUID
     email: string
@@ -34,9 +33,18 @@ interface ChatCreate {
 
 interface Message {
     content: string
+    from_user: boolean
+}
+
+interface LLMRequest {
+    content: string
+}
+
+interface GetMessage extends Message {
+    id: UUID
 }
 
 
-export type { User, UserDetail, Document, Chat, ChatCreate, Message }
+export type { User, UserDetail, Document, Chat, ChatCreate, Message, GetMessage, LLMRequest }
 
 

@@ -20,23 +20,18 @@ export function SidebarButton({
 }: Readonly<SidebarButtonProps>) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+
+  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const filesArray = Array.from(e.target.files)
-      console.log("Files selected in SidebarButton:", filesArray.length)
-
-      // Process each file individually
-      filesArray.forEach((file) => {
-        console.log("Processing file:", file.name)
-        onFileSelected(file)
-      })
-
-      // Reset the input value to ensure onChange fires even if selecting the same file again
+      const file = e.target.files[0]; 
+      onFileSelected(file); 
       if (fileInputRef.current) {
-        fileInputRef.current.value = ""
+        fileInputRef.current.value = ""; 
       }
     }
-  }
+  };
 
   return (
     <div className="grid grid-cols-1 gap-2 p-4">
@@ -44,7 +39,7 @@ export function SidebarButton({
         <PlusCircleIcon className="h-4 w-4 mr-2" />
         Create Chat
       </Button>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2" >
         <Button
           className="w-full"
           variant={activeTab === "sources" ? "default" : "outline"}
@@ -63,14 +58,13 @@ export function SidebarButton({
         </Button>
       </div>
 
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
         className="hidden"
         onChange={handleFileChange}
-        accept=".pdf,.docx,.doc,.txt,.md,.csv"
-        multiple={true}
+        accept=".pdf,.docx,.doc,.txt,.md"
+        multiple={false}
       />
 
       <Button className="w-full" variant="outline" onClick={() => fileInputRef.current?.click()}>

@@ -11,6 +11,7 @@ import {
 import { LogOut } from "lucide-react"
 import { useAuth } from "@/providers/auth-provider";
 import {UserDetail} from "@/interfaces/User";
+import { ModeToggle } from "../ui/mode-toggle";
 
 interface UserNavProps {
   user: UserDetail | undefined;
@@ -34,6 +35,7 @@ export function UserNav({ user }: Readonly<UserNavProps>) {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user?.username}</p>
             <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+            <ModeToggle />
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

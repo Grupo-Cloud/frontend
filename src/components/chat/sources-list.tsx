@@ -9,6 +9,7 @@ interface SourceListProps {
 }
 
 export function SourceList({ documents, onDeleteDocument, formatFileSize }: Readonly<SourceListProps>) {
+
   return (
     <div className="flex-1 overflow-auto p-4">
       <h2 className="font-semibold mb-4">Sources</h2>
