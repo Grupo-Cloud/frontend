@@ -209,10 +209,10 @@ export default function HomePage() {
         <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
           <SheetContent
             side="left"
-            className="w-full bg-white bg-opacity-30 backdrop-blur-md"
+            className="w-full"
             onInteractOutside={event => event.preventDefault()}
           >
-            <SheetTitle className="pt-2 text-center font-semibold">
+            <SheetTitle className="pt-2 text-start font-semibold pl-4">
               Menu
             </SheetTitle>
             <SidebarButton
