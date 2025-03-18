@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { MenuIcon } from "lucide-react";
@@ -160,7 +159,7 @@ export default function HomePage() {
 
   const handleDeleteChat = async (id: string) => {
     if (selectedChat === id) {
-      setSelectedChat(chats.length > 1 ? chats[0].id : null)
+      setSelectedChat(chats.length > 1 ? chats[0].id : null);
     }
     await deleteChatMutation.mutateAsync(id);
   };
@@ -217,15 +216,17 @@ export default function HomePage() {
     </div>
   );
 
-  
   const MobileLayout = () => (
     <div className="md:hidden h-screen flex flex-col">
       <div className="border-b flex items-center justify-between px-4 py-2">
         <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-          <SheetContent side="left" className="w-full max-w-[300px] p-0">
-            <SheetHeader className="pt-4 text-center font-semibold">
-              <SheetTitle>Menu</SheetTitle>
-            </SheetHeader>
+          <SheetContent
+            side="left"
+            className="w-full bg-white bg-opacity-30 backdrop-blur-md"
+          >
+            <SheetTitle className="pt-2 text-center font-semibold">
+              Menu
+            </SheetTitle>
             <SidebarButton
               onCreateChat={() => {
                 handleCreateChat();
@@ -235,7 +236,6 @@ export default function HomePage() {
               setActiveTab={setActiveTab}
               documentsLength={documents.length}
               onFileSelected={handleFileSelected}
-              
             />
             {activeTab === "sources" ? (
               <SourceList
