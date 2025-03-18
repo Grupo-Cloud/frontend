@@ -11,8 +11,7 @@ interface SourceListProps {
 export function SourceList({ documents, onDeleteDocument, formatFileSize }: Readonly<SourceListProps>) {
 
   return (
-    <div className="flex-1 overflow-auto p-4">
-      <h2 className="font-semibold mb-4">Sources</h2>
+    <div className="flex-1 overflow-auto">
       {documents.length === 0 ? (
         <div className="text-center text-muted-foreground text-sm p-4">
           No sources added yet. Upload a document to get started.

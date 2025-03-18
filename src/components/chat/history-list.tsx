@@ -27,8 +27,7 @@ export function HistoryList({ chats, selectedChat, onSelectChat, onDeleteChat }:
   };
 
   return (
-    <div className="flex-1 overflow-auto p-4">
-      <h2 className="font-semibold mb-4">Chat History</h2>
+    <div className="flex-1 overflow-auto">
       {chats.length === 0 ? (
         <div className="text-center text-muted-foreground text-sm p-4">
           No chat history yet. Start a new chat to begin.

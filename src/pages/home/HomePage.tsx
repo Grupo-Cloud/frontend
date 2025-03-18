@@ -1,20 +1,15 @@
 import { useState, useEffect } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { MenuIcon } from "lucide-react";
 import { UserNav } from "@/components/chat/user-nav";
 import { SidebarButton } from "@/components/chat/sidebar-buttons";
-import { SourceList } from "@/components/chat/sources-list";
-import { HistoryList } from "@/components/chat/history-list";
 import { ChatArea } from "@/components/chat/chat-area";
 import { api } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Document, UserDetail, Chat, ChatCreate } from "@/interfaces/User";
+import { SidebarTabs } from "@/components/chat/sidebar-tabs";
 
 const ACCEPTED_FILE_TYPES = {
   "application/pdf": "PDF",
@@ -30,7 +25,6 @@ export default function HomePage() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"sources" | "history">("sources");
 
   const { token } = useAuth();
 
@@ -181,25 +175,18 @@ export default function HomePage() {
       <div className="w-[300px] border-r flex flex-col">
         <SidebarButton
           onCreateChat={handleCreateChat}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
           documentsLength={documents.length}
           onFileSelected={handleFileSelected}
         />
-        {activeTab === "sources" ? (
-          <SourceList
-            documents={documents}
-            onDeleteDocument={handleDeleteDocument}
-            formatFileSize={formatFileSize}
-          />
-        ) : (
-          <HistoryList
-            chats={chats}
-            selectedChat={chats.find((chat) => chat.id === selectedChat)}
-            onSelectChat={setSelectedChat}
-            onDeleteChat={handleDeleteChat}
-          />
-        )}
+        <SidebarTabs
+          documents={documents}
+          chats={chats}
+          selectedChat={selectedChat}
+          setSelectedChat={setSelectedChat}
+          handleDeleteDocument={handleDeleteDocument}
+          handleDeleteChat={handleDeleteChat}
+          formatFileSize={formatFileSize}
+        />
       </div>
       <div className="flex-1 flex flex-col">
         <div className="border-b flex items-center justify-between px-4 py-2">
@@ -223,6 +210,7 @@ export default function HomePage() {
           <SheetContent
             side="left"
             className="w-full bg-white bg-opacity-30 backdrop-blur-md"
+            onInteractOutside={event => event.preventDefault()}
           >
             <SheetTitle className="pt-2 text-center font-semibold">
               Menu
@@ -232,25 +220,18 @@ export default function HomePage() {
                 handleCreateChat();
                 setIsSidebarOpen(false);
               }}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
               documentsLength={documents.length}
               onFileSelected={handleFileSelected}
             />
-            {activeTab === "sources" ? (
-              <SourceList
-                documents={documents}
-                onDeleteDocument={handleDeleteDocument}
-                formatFileSize={formatFileSize}
-              />
-            ) : (
-              <HistoryList
-                chats={chats}
-                selectedChat={chats.find((chat) => chat.id === selectedChat)}
-                onSelectChat={setSelectedChat}
-                onDeleteChat={handleDeleteChat}
-              />
-            )}
+            <SidebarTabs
+              documents={documents}
+              chats={chats}
+              selectedChat={selectedChat}
+              setSelectedChat={setSelectedChat}
+              handleDeleteDocument={handleDeleteDocument}
+              handleDeleteChat={handleDeleteChat}
+              formatFileSize={formatFileSize}
+            />
           </SheetContent>
         </Sheet>
         <button

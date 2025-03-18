@@ -63,7 +63,6 @@ const SheetContent = React.forwardRef<
       ref={ref}
       className={cn(sheetVariants({ side }), "flex flex-col h-full", className)}
       {...props}
-      onPointerDownOutside={(e) => e.preventDefault()}
     >
       <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 disabled:pointer-events-none data-[state=open]:bg-secondary">
         <X className="h-4 w-4" />
