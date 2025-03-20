@@ -12,7 +12,6 @@ import {
 } from "@/interfaces/User";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { useAuth } from "@/providers/auth-provider";
 
 interface ChatAreaProps {
   documents: Document[];
@@ -28,7 +27,6 @@ export function ChatArea({
   onCreateChat,
 }: Readonly<ChatAreaProps>) {
   const [message, setMessage] = useState<Message["content"]>("");
-  const { token } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -43,11 +41,7 @@ export function ChatArea({
   };
   
   const fetchChatMessages = async () => {
-    const response = await api.get(`/chats/${selectedChat?.id}/messages`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.get(`/chats/${selectedChat?.id}/messages`);
     return response.data;
   };
 
@@ -60,11 +54,7 @@ export function ChatArea({
   const createChatMessageMutation = useMutation({
     mutationKey: ["addChatMessage", selectedChat?.id],
     mutationFn: async (message: Message) => {
-      return await api.post(`/chats/${selectedChat?.id}/messages`, message, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      return await api.post(`/chats/${selectedChat?.id}/messages`, message);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

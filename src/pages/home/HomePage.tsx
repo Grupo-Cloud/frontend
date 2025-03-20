@@ -29,11 +29,7 @@ export default function HomePage() {
   const { token } = useAuth();
 
   const fetchUser = async (): Promise<UserDetail> => {
-    const user = await api.get("/users/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const user = await api.get("/users/me");
     return user.data;
   };
 
@@ -41,12 +37,7 @@ export default function HomePage() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("upload_file", file);
-      return await api.post(`/users/${user?.id}/documents`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      return await api.post(`/users/${user?.id}/documents`, formData);
     },
     onSuccess: () => {
       refetchUser();
@@ -56,11 +47,7 @@ export default function HomePage() {
 
   const createChatMutation = useMutation({
     mutationFn: async (chat: ChatCreate): Promise<Chat> => {
-      const response = await api.post(`/users/${user?.id}/chats`, chat, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.post(`/users/${user?.id}/chats`, chat);
       return response.data;
     },
     onSuccess: (response) => {
@@ -72,11 +59,7 @@ export default function HomePage() {
 
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await api.delete(`/users/${user?.id}/documents/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      return await api.delete(`/users/${user?.id}/documents/${id}`);
     },
     onSuccess: () => {
       refetchUser();
@@ -86,11 +69,7 @@ export default function HomePage() {
 
   const deleteChatMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await api.delete(`/users/${user?.id}/chats/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      return await api.delete(`/users/${user?.id}/chats/${id}`);
     },
     onSuccess: () => {
       refetchUser();
