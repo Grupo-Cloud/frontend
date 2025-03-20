@@ -24,7 +24,7 @@ interface AuthProviderProps {
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-  const [refreshToken, setRefreshToken] = useState<string | null>(localStorage.getItem("refreshToken"));
+  const [refreshToken, setRefreshToken] = useState<string | null>(sessionStorage.getItem("refreshToken"));
 
   useEffect(() => {
     if (token) {
@@ -36,9 +36,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (refreshToken) {
-      localStorage.setItem("refreshToken", refreshToken);
+      sessionStorage.setItem("refreshToken", refreshToken);
     } else {
-      localStorage.removeItem("refreshToken");
+      sessionStorage.removeItem("refreshToken");
     }
   }, [refreshToken]);
 
@@ -46,7 +46,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setToken(null);
     setRefreshToken(null);
     localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("refreshToken");
   }, []);
 
   const contextValue = useMemo(
