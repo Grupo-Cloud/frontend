@@ -8,8 +8,8 @@ import SignUp from "@/pages/auth/SignUpPage";
 
 const Routes = () => {
 
-  const { token } = useAuth();
-
+  const { auth } = useAuth();
+  
   const routesForAuthenticatedOnly = [
     {
       path: "/",
@@ -43,7 +43,7 @@ const Routes = () => {
   ];
 
   const router = createBrowserRouter([
-    ...(!token ? routesForNotAuthenticatedOnly : []),
+    ...(!auth?.access_token ? routesForNotAuthenticatedOnly : []),
     ...routesForAuthenticatedOnly,
     ...commonRoutes,
   ]);

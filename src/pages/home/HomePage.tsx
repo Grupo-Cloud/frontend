@@ -26,7 +26,7 @@ export default function HomePage() {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const { token } = useAuth();
+  const { auth } = useAuth();
 
   const fetchUser = async (): Promise<UserDetail> => {
     const user = await api.get("/users/me");
@@ -80,7 +80,7 @@ export default function HomePage() {
   const { data: user, refetch: refetchUser } = useQuery({
     queryKey: ["user"],
     queryFn: fetchUser,
-    enabled: !!token,
+    enabled: !!auth?.access_token,
   });
 
   useEffect(() => {

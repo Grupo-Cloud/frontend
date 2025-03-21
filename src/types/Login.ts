@@ -1,6 +1,5 @@
-interface LoginFormData {
+export default interface LoginFormData {
     email: string;
     password: string;
 }
 
-export default LoginFormData;

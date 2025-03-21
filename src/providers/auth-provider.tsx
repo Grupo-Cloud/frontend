@@ -1,3 +1,4 @@
+import { Auth } from "@/types/Auth";
 import {
   createContext,
   useContext,
@@ -9,10 +10,8 @@ import {
 } from "react";
 
 interface AuthContextType {
-  token: string | null;
-  setToken: (newToken: string | null) => void;
-  refreshToken: string | null;
-  setRefreshToken: (newRefreshToken: string | null) => void;
+  auth: Auth | null;
+  setAuth: (auth: Auth | null) => void;
   logout: () => void;
 }
 
@@ -23,41 +22,41 @@ interface AuthProviderProps {
 }
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-  const [refreshToken, setRefreshToken] = useState<string | null>(sessionStorage.getItem("refreshToken"));
+
+  const [auth, setAuth] = useState<Auth | null>({
+    access_token: localStorage.getItem("token") || "",
+    refresh_token: sessionStorage.getItem("refreshToken") || "",
+  });
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
+    if (auth?.access_token) {
+      localStorage.setItem("token", auth.access_token);
     } else {
       localStorage.removeItem("token");
     }
-  }, [token]);
+  }, [auth]);
 
   useEffect(() => {
-    if (refreshToken) {
-      sessionStorage.setItem("refreshToken", refreshToken);
+    if (auth?.refresh_token) {
+      sessionStorage.setItem("refreshToken", auth.refresh_token);
     } else {
       sessionStorage.removeItem("refreshToken");
     }
-  }, [refreshToken]);
+  }, [auth]);
 
   const logout = useCallback(() => {
-    setToken(null);
-    setRefreshToken(null);
+    setAuth(null);
     localStorage.removeItem("token");
     sessionStorage.removeItem("refreshToken");
   }, []);
 
   const contextValue = useMemo(
     () => ({
-      token,
-      setToken,
-      refreshToken,
-      setRefreshToken,
+      auth,
+      setAuth,
       logout,
     }),
-    [token, refreshToken, logout]
+    [auth, logout]
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

@@ -28,16 +28,14 @@ export function SignUpForm({
     "email": "",
     "password": "",
   });
-  const { setToken, setRefreshToken } = useAuth();
+  const { setAuth } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
 
-  
 const mutationLogin = useMutation({
     mutationFn: async (data: FormData) => await api.post("/auth/login", data),
     onSuccess: (data) => {
-      setToken(data.data.access_token);
-      setRefreshToken(data.data.refresh_token);
+      setAuth(data.data);
       navigate("/");
       mutationLogin.reset();
     },
