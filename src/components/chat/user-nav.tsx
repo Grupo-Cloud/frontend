@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
-import { UserDetail } from "@/interfaces/User";
+import { UserDetail } from "@/types/User";
 import { ModeToggle } from "../ui/mode-toggle";
 
 interface UserNavProps {

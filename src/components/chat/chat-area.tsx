@@ -9,7 +9,7 @@ import {
   GetMessage,
   LLMRequest,
   Message,
-} from "@/interfaces/User";
+} from "@/types/User";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 

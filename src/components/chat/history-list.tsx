@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Trash2 } from "lucide-react"
-import {Chat} from "@/interfaces/User"
+import {Chat} from "@/types/User"
 
 interface HistoryListProps {
   chats: Chat[]

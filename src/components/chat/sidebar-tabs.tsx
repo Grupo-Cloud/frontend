@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Chat, Document } from "@/interfaces/User";
+import { Chat, Document } from "@/types/User";
 import { FileTextIcon, HistoryIcon } from "lucide-react";
 import { HistoryList } from "./history-list";
 import { SourceList } from "./sources-list";
