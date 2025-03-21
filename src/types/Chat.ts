@@ -1,12 +1,12 @@
-import { UUID } from "crypto"
+import { UUID } from "crypto";
 
 export interface Chat {
-    id: UUID
-    name: string
-    creation_date: string
+  id: UUID;
+  name: string;
+  creation_date: string;
 }
 
 export interface ChatCreate {
-    name: string
-    user_id: UUID
+  name: string;
+  user_id: UUID;
 }

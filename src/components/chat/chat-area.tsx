@@ -36,7 +36,7 @@ export function ChatArea({
       }
     }
   };
-  
+
   const fetchChatMessages = async () => {
     const response = await api.get(`/chats/${selectedChat?.id}/messages`);
     return response.data;
@@ -64,7 +64,7 @@ export function ChatArea({
     mutationFn: async (message: LLMRequest) => {
       const query = message.content;
       const response = await api.post(
-        `/llm/generate?query=${encodeURIComponent(query)}`
+        `/llm/generate?query=${encodeURIComponent(query)}`,
       );
       return response.data;
     },
@@ -163,7 +163,7 @@ export function ChatArea({
         <div
           className={cn(
             "flex items-center gap-2 rounded-lg border bg-muted px-4 py-2",
-            (documents.length === 0 || !selectedChat) && "opacity-50"
+            (documents.length === 0 || !selectedChat) && "opacity-50",
           )}
         >
           <input

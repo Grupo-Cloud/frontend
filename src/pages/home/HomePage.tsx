@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { UserDetail} from "@/types/User";
+import { UserDetail } from "@/types/User";
 import { SidebarTabs } from "@/components/chat/sidebar-tabs";
 import { Chat, ChatCreate } from "@/types/Chat";
 import { Document } from "@/types/Document";
@@ -191,7 +191,7 @@ export default function HomePage() {
           <SheetContent
             side="left"
             className="w-full"
-            onInteractOutside={event => event.preventDefault()}
+            onInteractOutside={(event) => event.preventDefault()}
           >
             <SheetTitle className="pt-2 text-start font-semibold pl-4">
               Menu

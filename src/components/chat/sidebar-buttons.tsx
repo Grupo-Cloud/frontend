@@ -1,11 +1,7 @@
 import type React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  PlusCircleIcon,
-  PlusIcon,
-} from "lucide-react";
+import { PlusCircleIcon, PlusIcon } from "lucide-react";
 import { useRef } from "react";
-
 
 interface SidebarButtonProps {
   onCreateChat?: () => void;

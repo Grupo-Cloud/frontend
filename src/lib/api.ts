@@ -24,13 +24,16 @@ const refreshAccessToken = async (): Promise<string | null> => {
       refreshSubscribers.push(resolve);
     });
   }
-  
+
   isRefreshing = true;
   try {
     const refreshToken = sessionStorage.getItem("refreshToken");
     if (!refreshToken) throw new Error("No refresh token available");
 
-    const { data } = await api.post<{ accessToken: string; refreshToken?: string }>("/auth/refresh", {
+    const { data } = await api.post<{
+      accessToken: string;
+      refreshToken?: string;
+    }>("/auth/refresh", {
       refreshToken,
     });
 
@@ -59,7 +62,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
@@ -87,5 +90,5 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );

@@ -22,7 +22,6 @@ interface AuthProviderProps {
 }
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-
   const [auth, setAuth] = useState<Auth | null>({
     access_token: localStorage.getItem("token") || "",
     refresh_token: sessionStorage.getItem("refreshToken") || "",
@@ -56,10 +55,12 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setAuth,
       logout,
     }),
-    [auth, logout]
+    [auth, logout],
   );
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 };
 
 export const useAuth = (): AuthContextType => {

@@ -1,11 +1,10 @@
-import { UUID } from "crypto"
+import { UUID } from "crypto";
 
 export interface Message {
-    content: string
-    from_user: boolean
+  content: string;
+  from_user: boolean;
 }
 
 export interface GetMessage extends Message {
-    id: UUID
+  id: UUID;
 }
-

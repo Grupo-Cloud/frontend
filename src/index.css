@@ -103,7 +103,7 @@
 }
 
 .scrollbar-detect.overflowing {
-  padding-right: 0.5rem; 
+  padding-right: 0.5rem;
 }
 
 @layer base {

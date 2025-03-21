@@ -1,3 +1,3 @@
 export interface LLMRequest {
-    content: string
+  content: string;
 }

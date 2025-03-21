@@ -7,13 +7,12 @@ import NotFound from "@/pages/NotFoundPage";
 import SignUp from "@/pages/auth/SignUpPage";
 
 const Routes = () => {
-
   const { auth } = useAuth();
-  
+
   const routesForAuthenticatedOnly = [
     {
       path: "/",
-      element: <ProtectedRoute />, 
+      element: <ProtectedRoute />,
       children: [
         {
           path: "/",
@@ -23,7 +22,6 @@ const Routes = () => {
     },
   ];
 
-
   const routesForNotAuthenticatedOnly = [
     {
       path: "/login",
@@ -32,13 +30,13 @@ const Routes = () => {
     {
       path: "/signup",
       element: <SignUp />,
-    }
+    },
   ];
 
   const commonRoutes = [
     {
       path: "*",
-      element: <NotFound />, 
+      element: <NotFound />,
     },
   ];
 

@@ -1,15 +1,18 @@
-import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
-import { Document } from "@/types/Document"
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import { Document } from "@/types/Document";
 
 interface SourceListProps {
-  documents: Document[]
-  onDeleteDocument: (id: string) => void
-  formatFileSize: (bytes: number) => string
+  documents: Document[];
+  onDeleteDocument: (id: string) => void;
+  formatFileSize: (bytes: number) => string;
 }
 
-export function SourceList({ documents, onDeleteDocument, formatFileSize }: Readonly<SourceListProps>) {
-
+export function SourceList({
+  documents,
+  onDeleteDocument,
+  formatFileSize,
+}: Readonly<SourceListProps>) {
   return (
     <div className="flex-1 overflow-auto">
       {documents.length === 0 ? (
@@ -19,12 +22,17 @@ export function SourceList({ documents, onDeleteDocument, formatFileSize }: Read
       ) : (
         <div className="space-y-2">
           {documents.map((doc) => (
-            <div key={doc.id} className="flex items-center justify-between rounded-md border p-3">
+            <div
+              key={doc.id}
+              className="flex items-center justify-between rounded-md border p-3"
+            >
               <div className="flex-1 min-w-0">
                 <div className="font-medium truncate" title={doc.name}>
                   {doc.name}
                 </div>
-                <div className="text-xs text-muted-foreground">{formatFileSize(doc.size)}</div>
+                <div className="text-xs text-muted-foreground">
+                  {formatFileSize(doc.size)}
+                </div>
               </div>
               <Button
                 variant="ghost"
@@ -40,6 +48,5 @@ export function SourceList({ documents, onDeleteDocument, formatFileSize }: Read
         </div>
       )}
     </div>
-  )
+  );
 }
-
