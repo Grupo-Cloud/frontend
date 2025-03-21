@@ -8,8 +8,10 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Document, UserDetail, Chat, ChatCreate } from "@/types/User";
+import { UserDetail} from "@/types/User";
 import { SidebarTabs } from "@/components/chat/sidebar-tabs";
+import { Chat, ChatCreate } from "@/types/Chat";
+import { Document } from "@/types/Document";
 
 const ACCEPTED_FILE_TYPES = {
   "application/pdf": "PDF",

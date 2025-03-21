@@ -3,15 +3,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MessageCircleIcon, UploadIcon } from "lucide-react";
 import { useRef, useState } from "react";
-import {
-  Chat,
-  Document,
-  GetMessage,
-  LLMRequest,
-  Message,
-} from "@/types/User";
+import { Document } from "@/types/Document";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { Chat } from "@/types/Chat";
+import { GetMessage, Message } from "@/types/Message";
+import { LLMRequest } from "@/types/LLM";
 
 interface ChatAreaProps {
   documents: Document[];
