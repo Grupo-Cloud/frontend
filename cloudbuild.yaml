@@ -4,7 +4,9 @@ steps:
     args: 
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/rag-app-frontend:$BUILD_ID'
+      - 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}:$BUILD_ID'
+      - '--build-arg'
+      - 'VITE_BACK_URL=${_VITE_BACK_URL}'
       - '.'
     timeout: '1200s'
 
@@ -12,7 +14,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: 
       - 'push'
-      - 'gcr.io/$PROJECT_ID/rag-app-frontend:$BUILD_ID'
+      - 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}:$BUILD_ID'
 
   # Paso 3: Desplegar en Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -20,22 +22,34 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'rag-app-frontend'
+      - '${_SERVICE_NAME}'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/rag-app-frontend:$BUILD_ID'
+      - 'gcr.io/$PROJECT_ID/${_SERVICE_NAME}:$BUILD_ID'
       - '--region'
-      - 'us-central1'
+      - '${_REGION}'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
       - '--port'
       - '80'
-      - '--set-env-vars'
-      - 'VITE_BACK_URL=https://notebooklmini-backend-1025455141637.us-central1.run.app'
+      - '--memory'
+      - '${_MEMORY}'
+      - '--cpu'
+      - '${_CPU}'
+      - '--max-instances'
+      - '${_MAX_INSTANCES}'
+      - '--min-instances'
+      - '${_MIN_INSTANCES}'
 
+# Configuración de sustituciones con valores por defecto
 substitutions:
   _SERVICE_NAME: 'rag-app-frontend'
   _REGION: 'us-central1'
+  _VITE_BACK_URL: 'http://localhost:8000'
+  _MEMORY: '512Mi'
+  _CPU: '1'
+  _MAX_INSTANCES: '10'
+  _MIN_INSTANCES: '0'
 
 # Configuración de timeout global
 timeout: '1800s'
